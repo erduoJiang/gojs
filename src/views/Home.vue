@@ -2,6 +2,7 @@
   <div id="wrap">
     <div style="textAlign:right">
       <button @click="save">保存</button>
+      <button @click="toogleBg">切换背景网格</button>
     </div>
     <div id="chart-wrap">
       <div id="chart-palette"></div>
@@ -18,7 +19,9 @@ const MAKE = go.GraphObject.make;
 export default {
   name: "Home",
   data() {
-    return {};
+    return {
+      showBg: true
+    };
   },
   mounted() {
     var mySelf = this;
@@ -28,7 +31,8 @@ export default {
       "toolManager.hoverDelay": 100, //tooltip提示显示延时
       "toolManager.toolTipDuration": 10000, //tooltip持续显示时间
       //isReadOnly:true,//只读
-      "grid.visible": true, //显示网格
+      "grid.visible": this.showBg, //显示网格
+      // "grid.visible": true, //显示网格
       allowMove: true, //允许拖动
       // allowDragOut:true,
       allowDelete: true,
@@ -260,6 +264,11 @@ export default {
       console.log("保存数据", this.myDiagram.model.toJson());
       const jsonResult = this.myDiagram.model.toJson();
       sessionStorage.setItem("goData", jsonResult);
+    },
+    toogleBg() {
+      // 切换背景
+      this.showBg = !this.showBg;
+      this.myDiagram.grid.visible = this.showBg;
     }
   }
 };
