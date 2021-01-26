@@ -7,6 +7,7 @@
     <div id="chart-wrap">
       <div id="chart-palette"></div>
       <div id="chart-diagram"></div>
+      <div id="chart-desc"></div>
     </div>
     <!-- <button @click="onSubmit"></button> -->
   </div>
@@ -15,7 +16,26 @@
 <script>
 // @ is an alias to /src
 import go from "gojs";
+import initTemplateMap from "../util/initTemplateMap";
 const MAKE = go.GraphObject.make;
+const dataArr = [
+  {
+    name: "Next",
+    imgUrl: require("../assets/images/icon-apply.png")
+  },
+  {
+    name: "Next2",
+    imgUrl: require("../assets/images/1.svg")
+  },
+  {
+    name: "Next3",
+    imgUrl: require("../assets/images/2.svg")
+  },
+  {
+    name: "Next4",
+    imgUrl: require("../assets/images/3.svg")
+  }
+];
 export default {
   name: "Home",
   data() {
@@ -120,89 +140,90 @@ export default {
     myModel.linkDataArray = [];
 
     // var lightText = "whitesmoke";
-    mySelf.myDiagram.nodeTemplateMap.add(
-      "Next",
-      MAKE(
-        go.Node,
-        "Spot",
-        // nodeStyle(),
-        // 记录保存时候的位置信息
-        new go.Binding("location", "loc").makeTwoWay(),
-        MAKE(
-          //声明创建一个新的面板对象,自定义方式可参考mySelf.myDiagram.nodeTemplate
-          go.Panel, //表明需要创建一个panel面板对象
-          "Auto", //页面布局为自动
+    initTemplateMap(dataArr, mySelf, MAKE, go, makePort);
+    // mySelf.myDiagram.nodeTemplateMap.add(
+    //   "Next",
+    //   MAKE(
+    //     go.Node,
+    //     "Spot",
+    //     // nodeStyle(),
+    //     // 记录保存时候的位置信息
+    //     new go.Binding("location", "loc").makeTwoWay(),
+    //     MAKE(
+    //       //声明创建一个新的面板对象,自定义方式可参考mySelf.myDiagram.nodeTemplate
+    //       go.Panel, //表明需要创建一个panel面板对象
+    //       "Auto", //页面布局为自动
 
-          // MAKE(
-          //   //声明构建一个圆角矩形
-          //   go.Shape,
-          //   "RoundedRectangle",
-          //   {
-          //     fill: "#44CCFF",
-          //     stroke: "#FFF",
-          //     strokeWidth: 1,
-          //     angle: 0
-          //   },
-          //   new go.Binding("figure", "figure") //声明并创建一个新的图形
-          // ),
-          // MAKE(
-          //   //声明一个可编辑文本域
-          //   go.TextBlock,
-          //   {
-          //     font: "12pt Helvetica, Arial, sans-serif",
-          //     stroke: lightText,
-          //     width: 125,
-          //     maxSize: new go.Size(360, NaN),
-          //     wrap: go.TextBlock.WrapFit, //文本域换行
-          //     editable: true, //是否可编辑
-          //     margin: 12,
-          //     // eslint-disable-next-line no-dupe-keys
-          //     wrap: go.TextBlock.WrapDesiredSize
-          //   },
-          //   new go.Binding("text").makeTwoWay()
-          // )
+    //       // MAKE(
+    //       //   //声明构建一个圆角矩形
+    //       //   go.Shape,
+    //       //   "RoundedRectangle",
+    //       //   {
+    //       //     fill: "#44CCFF",
+    //       //     stroke: "#FFF",
+    //       //     strokeWidth: 1,
+    //       //     angle: 0
+    //       //   },
+    //       //   new go.Binding("figure", "figure") //声明并创建一个新的图形
+    //       // ),
+    //       // MAKE(
+    //       //   //声明一个可编辑文本域
+    //       //   go.TextBlock,
+    //       //   {
+    //       //     font: "12pt Helvetica, Arial, sans-serif",
+    //       //     stroke: lightText,
+    //       //     width: 125,
+    //       //     maxSize: new go.Size(360, NaN),
+    //       //     wrap: go.TextBlock.WrapFit, //文本域换行
+    //       //     editable: true, //是否可编辑
+    //       //     margin: 12,
+    //       //     // eslint-disable-next-line no-dupe-keys
+    //       //     wrap: go.TextBlock.WrapDesiredSize
+    //       //   },
+    //       //   new go.Binding("text").makeTwoWay()
+    //       // )
 
-          // 背景图片与图标
-          MAKE(
-            go.Panel,
-            go.Panel.Auto,
-            // { position: new go.Point(0, 72) },
-            MAKE(
-              go.Picture,
-              {
-                width: 128,
-                height: 118,
-                source: require("../assets/images/circle_1.png")
-              }
-              // new go.Binding("source", "bgSrc")
-            ),
-            MAKE(
-              go.Picture,
-              {
-                width: 64,
-                height: 64,
-                source: require("../assets/images/icon-apply.png")
-              }
-              // new go.Binding("source", "iconSrc")
-            ),
-            MAKE(
-              go.TextBlock,
-              {
-                margin: 4,
-                stroke: "yellow",
-                font: "14px sans-serif"
-              },
-              new go.Binding("text", "text")
-            )
-          )
-        ),
-        // four named ports, one on each side:
-        makePort("T", go.Spot.Top, false, true),
-        makePort("L", go.Spot.Left, true, true),
-        makePort("R", go.Spot.Right, true, true),
-        makePort("B", go.Spot.Bottom, true, false)
-      )
-    );
+    //       // 背景图片与图标
+    //       MAKE(
+    //         go.Panel,
+    //         go.Panel.Auto,
+    //         // { position: new go.Point(0, 72) },
+    //         // MAKE(
+    //         //   go.Picture,
+    //         //   {
+    //         //     width: 128,
+    //         //     height: 118,
+    //         //     source: require("../assets/images/circle_1.png")
+    //         //   }
+    //         //   // new go.Binding("source", "bgSrc")
+    //         // ),
+    //         MAKE(
+    //           go.Picture,
+    //           {
+    //             width: 32,
+    //             height: 32,
+    //             source: require("../assets/images/icon-apply.png")
+    //           }
+    //           // new go.Binding("source", "iconSrc")
+    //         )
+    //         // MAKE(
+    //         //   go.TextBlock,
+    //         //   {
+    //         //     margin: 4,
+    //         //     stroke: "yellow",
+    //         //     font: "14px sans-serif"
+    //         //   },
+    //         //   new go.Binding("text", "text")
+    //         // )
+    //       )
+    //     ),
+    //     // four named ports, one on each side:
+    //     makePort("T", go.Spot.Top, false, true),
+    //     makePort("L", go.Spot.Left, true, true),
+    //     makePort("R", go.Spot.Right, true, true),
+    //     makePort("B", go.Spot.Bottom, true, false)
+    //   )
+    // );
 
     //Node连接线
     function makePort(name, spot, output, input) {
@@ -241,8 +262,18 @@ export default {
               loc: ""
             },
             {
-              category: "Next",
-              text: "开关",
+              category: "Next4",
+              text: "你",
+              loc: ""
+            },
+            {
+              category: "Next2",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next3",
+              text: "开关22",
               loc: ""
             }
           ])
@@ -304,6 +335,13 @@ export default {
     flex-grow: 1;
     height: 720px;
     background-color: #000;
+    border: solid 1px rgb(244, 244, 244);
+  }
+
+  #chart-desc {
+    width: 180px;
+    margin-right: 10px;
+    background-color: gray;
     border: solid 1px rgb(244, 244, 244);
   }
 }
