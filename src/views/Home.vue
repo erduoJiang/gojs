@@ -19,8 +19,24 @@
         </a-collapse>
       </div>
 
-      <div id="chart-diagram"></div>
-      <div id="chart-desc"></div>
+      <div
+        id="chart-diagram"
+        :style="`backgroundColor:${backgroundColor}`"
+      ></div>
+      <div id="chart-desc">
+        <div class="chart-figure">
+          图表
+        </div>
+        <div class="figure-content">
+          <div class="figure-content-bg">
+            背景：
+            <colorPicker
+              v-model="backgroundColor"
+              @change="headleChangeColor"
+            />
+          </div>
+        </div>
+      </div>
     </div>
     <!-- <button @click="onSubmit"></button> -->
   </div>
@@ -110,7 +126,8 @@ export default {
   data() {
     return {
       showBg: true,
-      activeKey: ["1", "2", "3"]
+      activeKey: ["1", "2", "3"],
+      backgroundColor: "#00afee"
     };
   },
   mounted() {
@@ -137,11 +154,14 @@ export default {
     console.log(mySelf.myDiagram);
     mySelf.myDiagram.addDiagramListener("ObjectSingleClicked", function(e) {
       // debugger;
+      console.log("点击的节点信息：", e);
+      console.log("点击的节点信息obj：", e.subject.part.data);
       console.log(e.subject.part);
     });
 
     mySelf.myDiagram.addDiagramListener("BackgroundSingleClicked", function(e) {
       // debugger;
+      console.log("点击背景啦");
       console.log("Double-clicked at" + e.diagram.lastInput.documentPoint);
     });
 
@@ -329,10 +349,12 @@ export default {
             {
               category: "Next2-1",
               text: "",
+              desc: "我是一个",
               loc: ""
             },
             {
               category: "Next2-2",
+              desc: "大白鸡",
               text: "",
               loc: ""
             },
@@ -463,6 +485,9 @@ export default {
       // 切换背景
       this.showBg = !this.showBg;
       this.myDiagram.grid.visible = this.showBg;
+    },
+    headleChangeColor() {
+      console.log("颜色是哈，", this.backgroundColor);
     }
   }
 };
@@ -510,10 +535,19 @@ export default {
   }
 
   #chart-desc {
-    width: 180px;
+    width: 280px;
     margin-right: 10px;
-    background-color: gray;
+    background-color: rgb(233, 225, 225);
     border: solid 1px rgb(244, 244, 244);
+    .chart-figure {
+      border-bottom: 1px solid #dadce0;
+      padding: 5px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .figure-content {
+      padding: 20px;
+    }
   }
 }
 

@@ -5,9 +5,11 @@ import store from "./store";
 import axios from "axios";
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
+import vcolorpicker from "vcolorpicker";
 
 Vue.config.productionTip = false;
 Vue.prototype.$http = axios;
+Vue.use(vcolorpicker);
 Vue.use(Antd);
 new Vue({
   router,
