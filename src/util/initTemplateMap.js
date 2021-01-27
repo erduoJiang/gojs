@@ -59,7 +59,7 @@ export default (dataArr, mySelf, MAKE, go, makePort) => {
             MAKE(
               go.Picture,
               {
-                width: 64,
+                width: 32,
                 height: 32,
                 source: item.imgUrl
               }

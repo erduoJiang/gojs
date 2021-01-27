@@ -1,11 +1,24 @@
 <template>
   <div id="wrap">
     <div style="textAlign:right">
-      <button @click="save">保存</button>
+      <a-button type="primary" @click="save">保存</a-button>
       <button @click="toogleBg">切换背景网格</button>
     </div>
     <div id="chart-wrap">
-      <div id="chart-palette"></div>
+      <div class="sideBar">
+        <a-collapse v-model="activeKey">
+          <a-collapse-panel key="1" header="基本元件">
+            <div id="chart-palette"></div>
+          </a-collapse-panel>
+          <a-collapse-panel key="2" header="水电元件">
+            <div id="chart-two"></div>
+          </a-collapse-panel>
+          <a-collapse-panel key="3" header="高级元件">
+            <div id="chart-three"></div>
+          </a-collapse-panel>
+        </a-collapse>
+      </div>
+
       <div id="chart-diagram"></div>
       <div id="chart-desc"></div>
     </div>
@@ -21,26 +34,83 @@ const MAKE = go.GraphObject.make;
 const dataArr = [
   {
     name: "Next",
-    imgUrl: require("../assets/images/icon-apply.png")
+    imgUrl: require("../assets/images/4.png")
   },
   {
     name: "Next2",
-    imgUrl: require("../assets/images/1.svg")
+    imgUrl: require("../assets/images/1.png")
   },
   {
     name: "Next3",
-    imgUrl: require("../assets/images/2.svg")
+    imgUrl: require("../assets/images/2.png")
   },
   {
     name: "Next4",
-    imgUrl: require("../assets/images/3.svg")
+    imgUrl: require("../assets/images/3.png")
+  },
+  {
+    name: "Next5",
+    imgUrl: require("../assets/images/5.png")
+  },
+  {
+    name: "Next6",
+    imgUrl: require("../assets/images/6.png")
+  },
+  {
+    name: "Next7",
+    imgUrl: require("../assets/images/7.png")
+  },
+  {
+    name: "Next2-1",
+    imgUrl: require("../assets/images/2-1.png")
+  },
+  {
+    name: "Next2-2",
+    imgUrl: require("../assets/images/2-2.png")
+  },
+  {
+    name: "Next2-3",
+    imgUrl: require("../assets/images/2-3.png")
+  },
+  {
+    name: "Next2-4",
+    imgUrl: require("../assets/images/2-4.png")
+  },
+  {
+    name: "Next2-5",
+    imgUrl: require("../assets/images/2-5.png")
+  },
+  {
+    name: "Next2-6",
+    imgUrl: require("../assets/images/2-6.png")
+  },
+  {
+    name: "Next2-7",
+    imgUrl: require("../assets/images/2-7.png")
+  },
+  {
+    name: "Next2-8",
+    imgUrl: require("../assets/images/2-8.png")
+  },
+  {
+    name: "Next2-9",
+    imgUrl: require("../assets/images/2-9.png")
+  },
+  {
+    name: "Next3-1",
+    imgUrl: require("../assets/images/3-1.png")
+  },
+  {
+    name: "Next3-2",
+    imgUrl: require("../assets/images/3-2.png")
   }
 ];
 export default {
   name: "Home",
   data() {
     return {
-      showBg: true
+      showBg: true,
+      activeKey: ["1", "2", "3"]
     };
   },
   mounted() {
@@ -248,6 +318,83 @@ export default {
     onSubmit() {},
     init() {
       var mySelf = this;
+      window.myTwo = MAKE(
+        go.Palette,
+        "chart-two", // must name or refer to the DIV HTML element
+        {
+          scrollsPageOnFocus: false,
+          nodeTemplateMap: mySelf.myDiagram.nodeTemplateMap, // share the templates used by myDiagram
+          model: new go.GraphLinksModel([
+            // specify the contents of the Palette
+            {
+              category: "Next2-1",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next2-2",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next2-3",
+              text: "开关22",
+              loc: ""
+            },
+            {
+              category: "Next2-4",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next2-5",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next2-6",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next2-7",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next2-8",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next2-9",
+              text: "",
+              loc: ""
+            }
+          ])
+        }
+      );
+      window.myThree = MAKE(
+        go.Palette,
+        "chart-three", // must name or refer to the DIV HTML element
+        {
+          scrollsPageOnFocus: false,
+          nodeTemplateMap: mySelf.myDiagram.nodeTemplateMap, // share the templates used by myDiagram
+          model: new go.GraphLinksModel([
+            // specify the contents of the Palette
+            {
+              category: "Next3-1",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next3-2",
+              text: "",
+              loc: ""
+            }
+          ])
+        }
+      );
       window.myPalette = MAKE(
         go.Palette,
         "chart-palette", // must name or refer to the DIV HTML element
@@ -272,6 +419,21 @@ export default {
               loc: ""
             },
             {
+              category: "Next5",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next6",
+              text: "",
+              loc: ""
+            },
+            {
+              category: "Next7",
+              text: "",
+              loc: ""
+            },
+            {
               category: "Next3",
               text: "开关22",
               loc: ""
@@ -279,6 +441,7 @@ export default {
           ])
         }
       );
+
       this.load();
     },
     load() {
@@ -324,11 +487,19 @@ export default {
   justify-content: space-between;
   margin-bottom: 22px;
 
-  #chart-palette {
-    width: 180px;
+  .sideBar {
+    width: 200px;
     margin-right: 10px;
-    background-color: gray;
-    border: solid 1px rgb(244, 244, 244);
+    // border: solid 3px rgb(238, 7, 7);
+    #chart-palette {
+      height: 200px;
+    }
+    #chart-two {
+      height: 200px;
+    }
+    #chart-three {
+      height: 200px;
+    }
   }
 
   #chart-diagram {
