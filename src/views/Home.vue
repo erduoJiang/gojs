@@ -46,6 +46,7 @@
 // @ is an alias to /src
 import go from "gojs";
 import initTemplateMap from "../util/initTemplateMap";
+import initTextTemplate from "../util/initTextTemplate";
 const MAKE = go.GraphObject.make;
 const dataArr = [
   {
@@ -137,6 +138,8 @@ export default {
       "undoManager.isEnabled": true, // 支持 Ctrl-Z 和 Ctrl-Y 操作
       "toolManager.hoverDelay": 100, //tooltip提示显示延时
       "toolManager.toolTipDuration": 10000, //tooltip持续显示时间
+      "draggingTool.dragsLink": true,
+      "draggingTool.isGridSnapEnabled": true,
       //isReadOnly:true,//只读
       "grid.visible": this.showBg, //显示网格
       // "grid.visible": true, //显示网格
@@ -231,6 +234,7 @@ export default {
 
     // var lightText = "whitesmoke";
     initTemplateMap(dataArr, mySelf, MAKE, go, makePort);
+    initTextTemplate(mySelf, MAKE, go, makePort);
     // mySelf.myDiagram.nodeTemplateMap.add(
     //   "Next",
     //   MAKE(
@@ -346,6 +350,7 @@ export default {
           nodeTemplateMap: mySelf.myDiagram.nodeTemplateMap, // share the templates used by myDiagram
           model: new go.GraphLinksModel([
             // specify the contents of the Palette
+            { category: "Text", text: "文字" },
             {
               category: "Next2-1",
               text: "",
@@ -483,6 +488,11 @@ export default {
     },
     toogleBg() {
       // 切换背景
+      console.log("哈喽，", this.myDiagram.undoManager.isEnabled);
+      // console.log("爬梯，", window.myPalette.model.commit);
+      // window.myPalette.model.commit(e => {
+      //   console.log("来啦老弟，", e);
+      // });
       this.showBg = !this.showBg;
       this.myDiagram.grid.visible = this.showBg;
     },
