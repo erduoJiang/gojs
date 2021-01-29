@@ -1,6 +1,6 @@
-var lightText = "#000";
+let lightText = "#000";
 export default (mySelf, MAKE, go) => {
-  var nodeResizeAdornmentTemplate = MAKE(
+  let nodeResizeAdornmentTemplate = MAKE(
     go.Adornment,
     "Spot",
     { locationSpot: go.Spot.Right },
@@ -122,6 +122,7 @@ export default (mySelf, MAKE, go) => {
             // wrap: go.TextBlock.WrapDesiredSize
           },
           //   new go.Binding("text", "text"),
+          new go.Binding("stroke", "color").makeTwoWay(),
           new go.Binding("text").makeTwoWay()
           //   new go.Binding("text", "text")
         )
