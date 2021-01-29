@@ -1,5 +1,5 @@
 export default (dataArr, mySelf, MAKE, go, makePort) => {
-  var nodeResizeAdornmentTemplate = MAKE(
+  let nodeResizeAdornmentTemplate = MAKE(
     go.Adornment,
     "Spot",
     { locationSpot: go.Spot.Right },
@@ -63,6 +63,14 @@ export default (dataArr, mySelf, MAKE, go, makePort) => {
       stroke: "deepskyblue"
     })
   );
+  const showSmallPorts = (node, show) => {
+    node.ports.each(function(port) {
+      if (port.portId !== "") {
+        // don't change the default port, which is the big shape
+        port.fill = show ? "rgba(0,0,0,.3)" : null;
+      }
+    });
+  };
   dataArr.forEach(item => {
     mySelf.myDiagram.nodeTemplateMap.add(
       item.name,
@@ -161,7 +169,16 @@ export default (dataArr, mySelf, MAKE, go, makePort) => {
         makePort("T", go.Spot.Top, true, true),
         makePort("L", go.Spot.Left, true, true),
         makePort("R", go.Spot.Right, true, true),
-        makePort("B", go.Spot.Bottom, true, true)
+        makePort("B", go.Spot.Bottom, true, true),
+        {
+          // handle mouse enter/leave events to show/hide the ports
+          mouseEnter: function(e, node) {
+            showSmallPorts(node, true);
+          },
+          mouseLeave: function(e, node) {
+            showSmallPorts(node, false);
+          }
+        }
       )
     );
   });
