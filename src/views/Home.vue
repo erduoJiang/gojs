@@ -128,7 +128,7 @@ export default {
     return {
       showBg: true,
       activeKey: ["1", "2", "3"],
-      backgroundColor: "#00afee"
+      backgroundColor: "#eeece1"
     };
   },
   mounted() {
@@ -140,6 +140,10 @@ export default {
       "toolManager.toolTipDuration": 10000, //tooltip持续显示时间
       "draggingTool.dragsLink": true,
       "draggingTool.isGridSnapEnabled": true,
+      "linkingTool.isUnconnectedLinkValid": true,
+      "linkingTool.portGravity": 20,
+      "relinkingTool.isUnconnectedLinkValid": true, // 设置线条拖动改变线条形状 （链接拖动功能）
+      "relinkingTool.portGravity": 20,
       //isReadOnly:true,//只读
       "grid.visible": this.showBg, //显示网格
       // "grid.visible": true, //显示网格
@@ -173,19 +177,39 @@ export default {
       console.log("Pasted" + e.diagram.selection.count + "parts");
     });
 
+    let linkSelectionAdornmentTemplate = MAKE(
+      go.Adornment,
+      "Link",
+      MAKE(
+        go.Shape,
+        // isPanelMain declares that this Shape shares the Link.geometry
+        { isPanelMain: true, fill: null, stroke: "deepskyblue", strokeWidth: 0 }
+      ) // use selection object's strokeWidth
+    );
+
     mySelf.myDiagram.linkTemplate = MAKE(
       go.Link,
       {
-        // curve: go.Link.Bezier
-      }, // 贝塞尔曲线
-      {
-        // routing: go.Link.Orthogonal,
-        routing: go.Link.AvoidsNodes,
-        corner: 15
+        selectable: true,
+        selectionAdornmentTemplate: linkSelectionAdornmentTemplate
       },
+      { relinkableFrom: true, relinkableTo: true, reshapable: true },
+      // {
+      //   // curve: go.Link.Bezier
+      // }, // 贝塞尔曲线
+      {
+        // routing: go.Link.Orthogonal, //曲线
+        // routing: go.Link.Normal // 直线
+        // curve: go.Link.Bezier,
+        routing: go.Link.AvoidsNodes // 正交
+        // corner: 15 // 正交的圆角
+      },
+      new go.Binding("routing", "routing").makeTwoWay(),
+      new go.Binding("points").makeTwoWay(),
       MAKE(
         go.Shape,
         {
+          isPanelMain: true,
           strokeWidth: 2,
           // stroke: "#F60"
           stroke: "green"
@@ -193,6 +217,7 @@ export default {
         new go.Binding("stroke", "linkColor")
       ),
       MAKE(go.Shape, {
+        // fromArrow: "Standard",
         toArrow: "Standard",
         // toArrow: "OpenTriangle",
         fill: "red",
@@ -205,7 +230,7 @@ export default {
           stroke: "yellow",
           font: "14px sans-serif",
           width: 50,
-          text: "中国梦",
+          // text: "中国梦",
           wrap: go.TextBlock.WrapDesiredSize
         },
         new go.Binding("text", "linktext")
@@ -227,6 +252,28 @@ export default {
           )
         ) // end of Adornment
       }
+      // MAKE(
+      //   go.Panel,
+      //   "Auto",
+      //   new go.Binding("visible", "isSelected").ofObject(),
+      //   MAKE(
+      //     go.Shape,
+      //     "RoundedRectangle", // the link shape
+      //     { fill: "#F8F8F8", stroke: null }
+      //   ),
+      //   MAKE(
+      //     go.TextBlock,
+      //     {
+      //       textAlign: "center",
+      //       font: "10pt helvetica, arial, sans-serif",
+      //       stroke: "#919191",
+      //       margin: 2,
+      //       minSize: new go.Size(10, NaN),
+      //       editable: true
+      //     },
+      //     new go.Binding("text").makeTwoWay()
+      //   )
+      // )
     );
     let myModel = MAKE(go.GraphLinksModel); //也可以创建link model;需要配置myModel.linkDataArray 如下
     myModel.nodeDataArray = [];
@@ -235,6 +282,7 @@ export default {
     // var lightText = "whitesmoke";
     initTemplateMap(dataArr, mySelf, MAKE, go, makePort);
     initTextTemplate(mySelf, MAKE, go, makePort);
+
     // mySelf.myDiagram.nodeTemplateMap.add(
     //   "Next",
     //   MAKE(
@@ -348,57 +396,109 @@ export default {
         {
           scrollsPageOnFocus: false,
           nodeTemplateMap: mySelf.myDiagram.nodeTemplateMap, // share the templates used by myDiagram
-          model: new go.GraphLinksModel([
-            // specify the contents of the Palette
-            { category: "Text", text: "文字" },
+          // simplify the link template, just in this Palette
+          linkTemplate: MAKE(
+            go.Link,
             {
-              category: "Next2-1",
-              text: "",
-              desc: "我是一个",
-              loc: ""
+              // because the GridLayout.alignment is Location and the nodes have locationSpot == Spot.Center,
+              // to line up the Link in the same manner we have to pretend the Link has the same location spot
+              locationSpot: go.Spot.Center,
+              selectionAdornmentTemplate: MAKE(
+                go.Adornment,
+                "Link",
+                { locationSpot: go.Spot.Center },
+                MAKE(go.Shape, {
+                  isPanelMain: true,
+                  fill: null,
+                  stroke: "deepskyblue",
+                  strokeWidth: 0
+                }),
+                MAKE(
+                  go.Shape, // the arrowhead
+                  { toArrow: "Standard", stroke: null }
+                )
+              )
             },
             {
-              category: "Next2-2",
-              desc: "大白鸡",
-              text: "",
-              loc: ""
+              routing: go.Link.AvoidsNodes,
+              curve: go.Link.JumpOver,
+              corner: 5,
+              toShortLength: 4
             },
-            {
-              category: "Next2-3",
-              text: "开关22",
-              loc: ""
-            },
-            {
-              category: "Next2-4",
-              text: "",
-              loc: ""
-            },
-            {
-              category: "Next2-5",
-              text: "",
-              loc: ""
-            },
-            {
-              category: "Next2-6",
-              text: "",
-              loc: ""
-            },
-            {
-              category: "Next2-7",
-              text: "",
-              loc: ""
-            },
-            {
-              category: "Next2-8",
-              text: "",
-              loc: ""
-            },
-            {
-              category: "Next2-9",
-              text: "",
-              loc: ""
-            }
-          ])
+            new go.Binding("points"),
+            MAKE(
+              go.Shape, // the link path shape
+              { isPanelMain: true, strokeWidth: 2 }
+            ),
+            MAKE(
+              go.Shape, // the arrowhead
+              { toArrow: "Standard", stroke: null }
+            )
+          ),
+          model: new go.GraphLinksModel(
+            [
+              // specify the contents of the Palette
+              { category: "Text", text: "文字" },
+              {
+                category: "Next2-1",
+                text: "",
+                desc: "我是一个",
+                loc: ""
+              },
+              {
+                category: "Next2-2",
+                desc: "大白鸡",
+                text: "",
+                loc: ""
+              },
+              {
+                category: "Next2-3",
+                text: "开关22",
+                loc: ""
+              },
+              {
+                category: "Next2-4",
+                text: "",
+                loc: ""
+              },
+              {
+                category: "Next2-5",
+                text: "",
+                loc: ""
+              },
+              {
+                category: "Next2-6",
+                text: "",
+                loc: ""
+              },
+              {
+                category: "Next2-7",
+                text: "",
+                loc: ""
+              },
+              {
+                category: "Next2-8",
+                text: "",
+                loc: ""
+              },
+              {
+                category: "Next2-9",
+                text: "",
+                loc: ""
+              }
+            ],
+            [
+              // the Palette also has a disconnected Link, which the user can drag-and-drop
+              {
+                points: new go.List(/*go.Point*/).addAll([
+                  new go.Point(0, 0),
+                  new go.Point(30, 0),
+                  new go.Point(30, 40),
+                  new go.Point(60, 40)
+                ])
+              }
+            ]
+          )
         }
       );
       window.myThree = MAKE(
