@@ -38,15 +38,30 @@
           <div v-show="elementType === 1">
             文字：
             <colorPicker v-model="textColor" @change="headleTextChangeColor" />
-            大小：
-            <a-input-number
-              v-model="defaultFont"
-              :min="10"
-              :max="100"
-              :formatter="value => `${value}pt`"
-              :parser="value => value.replace('pt', '')"
-              @change="onChange"
-            />
+            <div>
+              大小：
+              <a-input-number
+                v-model="defaultFont"
+                :min="10"
+                :max="100"
+                :formatter="value => `${value}pt`"
+                :parser="value => value.replace('pt', '')"
+                @change="onChange"
+              />
+            </div>
+            <div>
+              背景色：
+              <colorPicker
+                v-model="textBgColor"
+                @change="headleTextBgChangeColor"
+              />
+
+              <div>
+                <a-checkbox v-model="isCheckedBg" @change="onChangeTextBgColor">
+                  取消背景色
+                </a-checkbox>
+              </div>
+            </div>
           </div>
           <div v-show="elementType === 2">
             节点：
@@ -149,8 +164,10 @@ export default {
       activeKey: ["1", "2", "3"],
       backgroundColor: "#eeece1",
       textColor: "green",
+      textBgColor: "#000",
       elementType: 0,
       currentKey: undefined,
+      isCheckedBg: false,
       defaultFont: 12
     };
   },
@@ -200,6 +217,9 @@ export default {
             let node = this.myDiagram.model.findNodeDataForKey(this.currentKey);
             console.log("选中文字啦", node, parseInt(node.font));
             this.textColor = node.color;
+            if (node.background !== "transparent") {
+              this.textBgColor = node.background || "#000";
+            }
             this.defaultFont = parseInt(node.font) || 12;
           } else {
             console.log("选中节点啦：，", key);
@@ -656,6 +676,17 @@ export default {
       let node = this.myDiagram.model.findNodeDataForKey(this.currentKey);
       this.myDiagram.model.setDataProperty(node, "color", this.textColor);
     },
+    headleTextBgChangeColor() {
+      console.log("文字背景颜色是哈，", this.textBgColor);
+      // 设置文字背景颜色
+      this.isCheckedBg = false;
+      let node = this.myDiagram.model.findNodeDataForKey(this.currentKey);
+      this.myDiagram.model.setDataProperty(
+        node,
+        "background",
+        this.textBgColor
+      );
+    },
     onChange(value) {
       console.log("changed", value);
       let node = this.myDiagram.model.findNodeDataForKey(this.currentKey);
@@ -664,6 +695,14 @@ export default {
         "font",
         `${value}pt Helvetica, Arial, sans-serif`
       );
+    },
+    onChangeTextBgColor(e) {
+      console.log(`checked = ${e.target.checked}`);
+      console.log("好看，", this.isCheckedBg);
+      if (e.target.checked) {
+        let node = this.myDiagram.model.findNodeDataForKey(this.currentKey);
+        this.myDiagram.model.setDataProperty(node, "background", "transparent");
+      }
     }
   }
 };

@@ -124,6 +124,7 @@ export default (mySelf, MAKE, go) => {
           //   new go.Binding("text", "text"),
           new go.Binding("stroke", "color").makeTwoWay(),
           new go.Binding("font", "font").makeTwoWay(),
+          new go.Binding("background", "background").makeTwoWay(),
           new go.Binding("text").makeTwoWay()
           //   new go.Binding("text", "text")
         )
