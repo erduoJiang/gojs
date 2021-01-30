@@ -231,6 +231,14 @@ export default {
           let to = nodeOrLink.data.to;
           console.log("选中连线啦，", from, to);
           this.elementType = 3;
+          console.log("看哈，", nodeOrLink.data);
+
+          // 设置连线的形状
+          this.myDiagram.model.setDataProperty(
+            nodeOrLink.data,
+            "routing",
+            "go.Link.Orthogonal"
+          );
         }
       });
     });
