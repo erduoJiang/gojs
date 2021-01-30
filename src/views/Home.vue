@@ -132,7 +132,7 @@ export default {
     };
   },
   mounted() {
-    var mySelf = this;
+    let mySelf = this;
     mySelf.myDiagram = MAKE(go.Diagram, "chart-diagram", {
       // initialContentAlignment: go.Spot.Center, // 居中显示
       "undoManager.isEnabled": true, // 支持 Ctrl-Z 和 Ctrl-Y 操作
@@ -164,6 +164,25 @@ export default {
       console.log("点击的节点信息：", e);
       console.log("点击的节点信息obj：", e.subject.part.data);
       console.log(e.subject.part);
+
+      let nodeOrLinkList = mySelf.myDiagram.selection;
+      nodeOrLinkList.each(function(nodeOrLink) {
+        if (nodeOrLink instanceof go.Node) {
+          //获取选中节点
+          let key = nodeOrLink.data.key;
+          // 判断是节点还是文字
+          if (nodeOrLink.data.category === "Text") {
+            console.log("选中文字啦");
+          } else {
+            console.log("选中节点啦：，", key);
+          }
+        } else if (nodeOrLink instanceof go.Link) {
+          //获取选中的连线
+          let from = nodeOrLink.data.from;
+          let to = nodeOrLink.data.to;
+          console.log("选中连线啦，", from, to);
+        }
+      });
     });
 
     mySelf.myDiagram.addDiagramListener("BackgroundSingleClicked", function(e) {
@@ -279,7 +298,7 @@ export default {
     myModel.nodeDataArray = [];
     myModel.linkDataArray = [];
 
-    // var lightText = "whitesmoke";
+    // let lightText = "whitesmoke";
     initTemplateMap(dataArr, mySelf, MAKE, go, makePort);
     initTextTemplate(mySelf, MAKE, go, makePort);
 
@@ -389,7 +408,7 @@ export default {
   methods: {
     onSubmit() {},
     init() {
-      var mySelf = this;
+      let mySelf = this;
       window.myTwo = MAKE(
         go.Palette,
         "chart-two", // must name or refer to the DIV HTML element
