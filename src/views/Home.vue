@@ -28,12 +28,31 @@
           图表
         </div>
         <div class="figure-content">
-          <div class="figure-content-bg">
+          <div class="figure-content-bg" v-show="elementType === 0">
             背景：
             <colorPicker
               v-model="backgroundColor"
               @change="headleChangeColor"
             />
+          </div>
+          <div v-show="elementType === 1">
+            文字：
+            <colorPicker v-model="textColor" @change="headleTextChangeColor" />
+            大小：
+            <a-input-number
+              v-model="defaultFont"
+              :min="10"
+              :max="100"
+              :formatter="value => `${value}pt`"
+              :parser="value => value.replace('pt', '')"
+              @change="onChange"
+            />
+          </div>
+          <div v-show="elementType === 2">
+            节点：
+          </div>
+          <div v-show="elementType === 3">
+            连线：
           </div>
         </div>
       </div>
@@ -128,7 +147,11 @@ export default {
     return {
       showBg: true,
       activeKey: ["1", "2", "3"],
-      backgroundColor: "#eeece1"
+      backgroundColor: "#eeece1",
+      textColor: "green",
+      elementType: 0,
+      currentKey: undefined,
+      defaultFont: 12
     };
   },
   mounted() {
@@ -159,35 +182,43 @@ export default {
       // })
     }); //构建gojs对象
     console.log(mySelf.myDiagram);
-    mySelf.myDiagram.addDiagramListener("ObjectSingleClicked", function(e) {
+    mySelf.myDiagram.addDiagramListener("ObjectSingleClicked", e => {
       // debugger;
       console.log("点击的节点信息：", e);
       console.log("点击的节点信息obj：", e.subject.part.data);
       console.log(e.subject.part);
 
       let nodeOrLinkList = mySelf.myDiagram.selection;
-      nodeOrLinkList.each(function(nodeOrLink) {
+      nodeOrLinkList.each(nodeOrLink => {
         if (nodeOrLink instanceof go.Node) {
           //获取选中节点
           let key = nodeOrLink.data.key;
+          this.currentKey = key;
           // 判断是节点还是文字
           if (nodeOrLink.data.category === "Text") {
-            console.log("选中文字啦");
+            this.elementType = 1;
+            let node = this.myDiagram.model.findNodeDataForKey(this.currentKey);
+            console.log("选中文字啦", node, parseInt(node.font));
+            this.textColor = node.color;
+            this.defaultFont = parseInt(node.font) || 12;
           } else {
             console.log("选中节点啦：，", key);
+            this.elementType = 2;
           }
         } else if (nodeOrLink instanceof go.Link) {
           //获取选中的连线
           let from = nodeOrLink.data.from;
           let to = nodeOrLink.data.to;
           console.log("选中连线啦，", from, to);
+          this.elementType = 3;
         }
       });
     });
 
-    mySelf.myDiagram.addDiagramListener("BackgroundSingleClicked", function(e) {
+    mySelf.myDiagram.addDiagramListener("BackgroundSingleClicked", e => {
       // debugger;
       console.log("点击背景啦");
+      this.elementType = 0;
       console.log("Double-clicked at" + e.diagram.lastInput.documentPoint);
     });
 
@@ -617,6 +648,22 @@ export default {
     },
     headleChangeColor() {
       console.log("颜色是哈，", this.backgroundColor);
+    },
+    headleTextChangeColor() {
+      console.log("文字颜色是哈，", this.textColor);
+      console.log("文字key是哈，", this.currentKey);
+      // 设置文字颜色
+      let node = this.myDiagram.model.findNodeDataForKey(this.currentKey);
+      this.myDiagram.model.setDataProperty(node, "color", this.textColor);
+    },
+    onChange(value) {
+      console.log("changed", value);
+      let node = this.myDiagram.model.findNodeDataForKey(this.currentKey);
+      this.myDiagram.model.setDataProperty(
+        node,
+        "font",
+        `${value}pt Helvetica, Arial, sans-serif`
+      );
     }
   }
 };
