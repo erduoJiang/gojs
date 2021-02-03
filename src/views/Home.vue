@@ -272,13 +272,10 @@ export default {
         selectionAdornmentTemplate: linkSelectionAdornmentTemplate
       },
       { relinkableFrom: true, relinkableTo: true, reshapable: true },
-      // {
-      //   // curve: go.Link.Bezier
-      // }, // 贝塞尔曲线
       {
         // routing: go.Link.Orthogonal, //曲线
         // routing: go.Link.Normal // 直线
-        // curve: go.Link.Bezier,
+        // curve: go.Link.Bezier, // 贝塞尔曲线
         routing: go.Link.AvoidsNodes // 正交
         // corner: 15 // 正交的圆角
       },
@@ -329,7 +326,22 @@ export default {
             new go.Binding("text", "name1")
           )
         ) // end of Adornment
-      }
+      },
+      // 流动配置开始
+      // MAKE(go.Shape, {
+      //   isPanelMain: true,
+      //   stroke: "lightgreen",
+      //   strokeWidth: 1
+      // }),
+
+      MAKE(go.Shape, {
+        isPanelMain: true,
+        stroke: "red",
+        strokeWidth: 3,
+        name: "PIPE",
+        strokeDashArray: [5, 70]
+      })
+      // 流动配置结束
       // MAKE(
       //   go.Panel,
       //   "Auto",
@@ -353,6 +365,41 @@ export default {
       //   )
       // )
     );
+
+    // 流动开始
+    loop();
+    // let opacity = 1;
+    // let down = true;
+    function loop() {
+      let diagram = mySelf.myDiagram;
+      setTimeout(function() {
+        let oldskips = diagram.skipsUndoManager;
+        diagram.skipsUndoManager = true;
+        diagram.links.each(function(link) {
+          let shape = link.findObject("PIPE");
+          let off = shape.strokeDashOffset - 3;
+          // 设置（移动）笔划划动画
+          shape.strokeDashOffset = off <= 0 ? 600 : off;
+          // 动画（频闪）不透明度：
+          // if (down) opacity = opacity - 0.01;
+          // else opacity = opacity + 0.003;
+          // if (opacity <= 0) {
+          //   down = !down;
+          //   opacity = 0;
+          // }
+          // if (opacity > 1) {
+          //   down = !down;
+          //   opacity = 1;
+          // }
+          // shape.opacity = opacity;
+        });
+        diagram.skipsUndoManager = oldskips;
+        loop();
+      }, 60);
+    }
+
+    // 流动结束
+
     let myModel = MAKE(go.GraphLinksModel); //也可以创建link model;需要配置myModel.linkDataArray 如下
     myModel.nodeDataArray = [];
     myModel.linkDataArray = [];
