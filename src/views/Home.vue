@@ -250,7 +250,16 @@ export default {
             this.defaultFont = parseInt(node.font) || 12;
           } else {
             console.log("选中节点啦：，", key);
+            console.log("选中节点啦55：，", nodeOrLink.data);
             this.elementType = 2;
+
+            if (nodeOrLink.data.category === "Next2-5") {
+              this.myDiagram.model.setDataProperty(
+                nodeOrLink.data,
+                "category",
+                "Next2-6"
+              );
+            }
           }
         } else if (nodeOrLink instanceof go.Link) {
           //获取选中的连线
