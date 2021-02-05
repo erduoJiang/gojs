@@ -199,6 +199,33 @@ export default {
       // })
     }); //构建gojs对象
     console.log(mySelf.myDiagram);
+
+    // 监听连线完成事件
+    mySelf.myDiagram.addDiagramListener("LinkDrawn", e => {
+      //这是这个线条的数据
+      console.log("连线完成啦，", e.subject.data.to);
+      // 根据to找到链接的目标节点
+      console.log(
+        "哈喽，",
+        this.myDiagram.model.findNodeDataForKey(e.subject.data.to)
+      );
+      const node = this.myDiagram.model.findNodeDataForKey(e.subject.data.to);
+      console.log("看哈33320000，", e.subject.data);
+      // bar-link
+      if (node.category === "HBar") {
+        // 设置连线的形状
+        this.myDiagram.model.setDataProperty(
+          e.subject.data,
+          "category",
+          "bar-link"
+        );
+        this.save();
+        this.load();
+        // mySelf.myDiagram.div = null;
+        // mySelf.myDiagram.layoutDiagram(true);
+      }
+    });
+
     mySelf.myDiagram.addDiagramListener("ObjectSingleClicked", e => {
       // debugger;
       console.log("点击的节点信息：", e);
@@ -366,6 +393,136 @@ export default {
       // )
     );
 
+    // 自定义连线
+    // mySelf.myDiagram.linkTemplate = $(
+    //   BarLink, // subclass defined below
+    //   {
+    //     routing: go.Link.Orthogonal,
+    //     relinkableFrom: true,
+    //     relinkableTo: true,
+    //     toPortChanged: function(link, oldport, newport) {
+    //       if (newport instanceof go.Shape) link.path.stroke = newport.fill;
+    //     }
+    //   },
+    //   $(go.Shape, { strokeWidth: 2 })
+    // );
+    // 定义BarLink start
+    function BarLink() {
+      go.Link.call(this);
+    }
+    go.Diagram.inherit(BarLink, go.Link);
+
+    // BarLink的这几个方法是控制连线变直
+    BarLink.prototype.getLinkPoint = function(
+      node,
+      port,
+      spot,
+      from,
+      ortho,
+      othernode,
+      otherport
+    ) {
+      console.log(
+        "我要看一下，",
+        node,
+        port,
+        spot,
+        from,
+        ortho,
+        othernode,
+        otherport
+      );
+      console.log("我要看一下category，", node.category);
+      if (node.category === "HBar") {
+        var op = go.Link.prototype.getLinkPoint.call(
+          this,
+          othernode,
+          otherport,
+          this.computeSpot(!from),
+          !from,
+          ortho,
+          node,
+          port
+        );
+        var r = port.getDocumentBounds();
+        var y = op.y > r.centerY ? r.bottom : r.top;
+        if (op.x < r.left) return new go.Point(r.left, y);
+        if (op.x > r.right) return new go.Point(r.right, y);
+        return new go.Point(op.x, y);
+      } else {
+        return go.Link.prototype.getLinkPoint.call(
+          this,
+          node,
+          port,
+          spot,
+          from,
+          ortho,
+          othernode,
+          otherport
+        );
+      }
+      // return go.Link.prototype.getLinkPoint.call(this, node, port, spot, from, ortho, othernode, otherport);
+    };
+
+    BarLink.prototype.getLinkDirection = function(
+      node,
+      port,
+      linkpoint,
+      spot,
+      from,
+      ortho,
+      othernode,
+      otherport
+    ) {
+      var p = port.getDocumentPoint(go.Spot.Center);
+      var op = otherport.getDocumentPoint(go.Spot.Center);
+      var below = op.y > p.y;
+      return below ? 90 : 270;
+      // return 90
+    };
+    // 定义barLink end
+    mySelf.myDiagram.linkTemplateMap.add(
+      "bar-link",
+      MAKE(
+        BarLink,
+        {
+          routing: go.Link.Orthogonal,
+          relinkableFrom: true,
+          relinkableTo: true,
+          toPortChanged: function(link, oldport, newport) {
+            if (newport instanceof go.Shape) link.path.stroke = newport.fill;
+          }
+        },
+        MAKE(go.Shape, {
+          isPanelMain: true,
+          stroke: "lightgreen",
+          strokeWidth: 1
+        }),
+        MAKE(go.Shape, {
+          isPanelMain: true,
+          stroke: "red",
+          strokeWidth: 3,
+          name: "PIPE",
+          strokeDashArray: [5, 70]
+        })
+        // 流动配置开始
+        // MAKE(go.Shape, {
+        //   isPanelMain: true,
+        //   stroke: "lightgreen",
+        //   strokeWidth: 1
+        // }),
+
+        // MAKE(go.Shape, {
+        //   isPanelMain: true
+        // stroke: "red"
+        // strokeWidth: 3,
+        // name: "PIPE"
+        // strokeDashArray: [5, 70]
+        // })
+        // 流动配置结束
+      )
+    );
+
     // 流动开始
     loop();
     // let opacity = 1;
@@ -407,6 +564,90 @@ export default {
     // let lightText = "whitesmoke";
     initTemplateMap(dataArr, mySelf, MAKE, go, makePort);
     initTextTemplate(mySelf, MAKE, go, makePort);
+
+    // 横线
+    mySelf.myDiagram.nodeTemplateMap.add(
+      "HBar",
+      MAKE(
+        go.Node,
+        "Spot",
+        // new go.Binding("location", "location", go.Point.parse).makeTwoWay(
+        //   go.Point.stringify
+        // ),
+        new go.Binding("location", "loc").makeTwoWay(),
+        {
+          // special resizing: just at the ends
+          resizable: true,
+          resizeObjectName: "SHAPE",
+          resizeAdornmentTemplate: MAKE(
+            go.Adornment,
+            "Spot",
+            MAKE(go.Placeholder),
+            MAKE(
+              go.Shape, // left resize handle
+              {
+                alignment: go.Spot.Left,
+                cursor: "w-resize",
+                desiredSize: new go.Size(6, 6),
+                fill: "lightblue",
+                stroke: "dodgerblue"
+              }
+            ),
+            MAKE(
+              go.Shape, // right resize handle
+              {
+                alignment: go.Spot.Right,
+                cursor: "e-resize",
+                desiredSize: new go.Size(6, 6),
+                fill: "lightblue",
+                stroke: "dodgerblue"
+              }
+            )
+          )
+        },
+        MAKE(
+          go.Shape,
+          "Rectangle",
+          {
+            name: "SHAPE",
+            fill: "black",
+            stroke: null,
+            strokeWidth: 0,
+            width: 1000,
+            height: 2,
+            minSize: new go.Size(100, 2),
+            maxSize: new go.Size(Infinity, 2)
+          },
+          new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(
+            go.Size.stringify
+          ),
+          new go.Binding("fill"),
+          { portId: "", toLinkable: false } // toLinkable如果为true，模板直线连线就拖不动
+        ),
+        MAKE(
+          go.TextBlock,
+          {
+            alignment: go.Spot.Right,
+            alignmentFocus: go.Spot.Left,
+            editable: true
+          },
+          new go.Binding("text").makeTwoWay()
+        ),
+        makePort("T", go.Spot.Top, true, true),
+        makePort("L", go.Spot.Left, true, true),
+        makePort("R", go.Spot.Right, true, true),
+        makePort("B", go.Spot.Bottom, true, true)
+        // {
+        //   // handle mouse enter/leave events to show/hide the ports
+        //   mouseEnter: function(e, node) {
+        //     showSmallPorts(node, true);
+        //   },
+        //   mouseLeave: function(e, node) {
+        //     showSmallPorts(node, false);
+        //   }
+        // }
+      )
+    );
 
     // mySelf.myDiagram.nodeTemplateMap.add(
     //   "Next",
@@ -522,44 +763,46 @@ export default {
           scrollsPageOnFocus: false,
           nodeTemplateMap: mySelf.myDiagram.nodeTemplateMap, // share the templates used by myDiagram
           // simplify the link template, just in this Palette
-          linkTemplate: MAKE(
-            go.Link,
-            {
-              // because the GridLayout.alignment is Location and the nodes have locationSpot == Spot.Center,
-              // to line up the Link in the same manner we have to pretend the Link has the same location spot
-              locationSpot: go.Spot.Center,
-              selectionAdornmentTemplate: MAKE(
-                go.Adornment,
-                "Link",
-                { locationSpot: go.Spot.Center },
-                MAKE(go.Shape, {
-                  isPanelMain: true,
-                  fill: null,
-                  stroke: "deepskyblue",
-                  strokeWidth: 0
-                }),
-                MAKE(
-                  go.Shape, // the arrowhead
-                  { toArrow: "Standard", stroke: null }
-                )
-              )
-            },
-            {
-              routing: go.Link.AvoidsNodes,
-              curve: go.Link.JumpOver,
-              corner: 5,
-              toShortLength: 4
-            },
-            new go.Binding("points"),
-            MAKE(
-              go.Shape, // the link path shape
-              { isPanelMain: true, strokeWidth: 2 }
-            ),
-            MAKE(
-              go.Shape, // the arrowhead
-              { toArrow: "Standard", stroke: null }
-            )
-          ),
+          // 模板里的线条 start
+          // linkTemplate: MAKE(
+          //   go.Link,
+          //   {
+          //     // because the GridLayout.alignment is Location and the nodes have locationSpot == Spot.Center,
+          //     // to line up the Link in the same manner we have to pretend the Link has the same location spot
+          //     locationSpot: go.Spot.Center,
+          //     selectionAdornmentTemplate: MAKE(
+          //       go.Adornment,
+          //       "Link",
+          //       { locationSpot: go.Spot.Center },
+          //       MAKE(go.Shape, {
+          //         isPanelMain: true,
+          //         fill: null,
+          //         stroke: "deepskyblue",
+          //         strokeWidth: 0
+          //       }),
+          //       MAKE(
+          //         go.Shape, // the arrowhead
+          //         { toArrow: "Standard", stroke: null }
+          //       )
+          //     )
+          //   },
+          //   {
+          //     routing: go.Link.AvoidsNodes,
+          //     curve: go.Link.JumpOver,
+          //     corner: 5,
+          //     toShortLength: 4
+          //   },
+          //   new go.Binding("points"),
+          //   MAKE(
+          //     go.Shape, // the link path shape
+          //     { isPanelMain: true, strokeWidth: 2 }
+          //   ),
+          //   MAKE(
+          //     go.Shape, // the arrowhead
+          //     { toArrow: "Standard", stroke: null }
+          //   )
+          // ),
+          // 模板里的线条 end
           model: new go.GraphLinksModel(
             [
               // specify the contents of the Palette
@@ -610,7 +853,9 @@ export default {
                 category: "Next2-9",
                 text: "",
                 loc: ""
-              }
+              },
+              // 横线
+              { text: "Bar", category: "HBar", size: "100 4" }
             ],
             [
               // the Palette also has a disconnected Link, which the user can drag-and-drop
@@ -626,6 +871,7 @@ export default {
           )
         }
       );
+
       window.myThree = MAKE(
         go.Palette,
         "chart-three", // must name or refer to the DIV HTML element
